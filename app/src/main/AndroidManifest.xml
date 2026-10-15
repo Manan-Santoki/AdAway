@@ -53,12 +53,7 @@
             android:name=".ui.home.HomeActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.AdAway.NoActionBar" />
-        <!-- Launcher entry as an alias, so a ROM with built-in support can hide it -->
-        <activity-alias
-            android:name=".ui.home.LauncherAlias"
-            android:exported="true"
-            android:targetActivity=".ui.home.HomeActivity">
+            android:theme="@style/Theme.AdAway.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -66,7 +61,7 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
-        </activity-alias>
+        </activity>
         <!-- Settings > Network & internet > Ad blocking, shown when built into the ROM -->
         <activity-alias
             android:name=".ui.home.SettingsEntry"

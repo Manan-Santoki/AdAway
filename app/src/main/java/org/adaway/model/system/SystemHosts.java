@@ -1,9 +1,6 @@
 package org.adaway.model.system;
 
 import android.annotation.SuppressLint;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Process;
 import android.os.SystemClock;
 
@@ -64,19 +61,6 @@ public final class SystemHosts {
      */
     public static void requestApply() {
         setProperty(PROP_APPLY, Long.toString(System.currentTimeMillis()));
-    }
-
-    /**
-     * Hide the launcher icon and the quick settings tile: on such a ROM the app is opened from
-     * Settings, and blocking stays on by default.
-     */
-    public static void setBuiltInComponents(Context context) {
-        PackageManager pm = context.getPackageManager();
-        String pkg = context.getPackageName();
-        for (String name : new String[]{".ui.home.LauncherAlias", ".tile.AdBlockingTileService"}) {
-            pm.setComponentEnabledSetting(new ComponentName(pkg, pkg + name),
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-        }
     }
 
     @SuppressLint("PrivateApi")

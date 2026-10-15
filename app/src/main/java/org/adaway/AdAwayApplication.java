@@ -9,7 +9,6 @@ import org.adaway.model.adblocking.AdBlockMethod;
 import org.adaway.model.adblocking.AdBlockModel;
 import org.adaway.model.source.SourceModel;
 import org.adaway.model.source.SourceUpdateService;
-import org.adaway.model.system.SystemHosts;
 import org.adaway.model.update.UpdateModel;
 import org.adaway.util.Constants;
 import org.adaway.util.log.ApplicationLog;
@@ -56,7 +55,6 @@ public class AdAwayApplication extends Application {
         if (prefs.getBoolean(PREF_SYSTEM_SET_UP, false)) {
             return;
         }
-        SystemHosts.setBuiltInComponents(this);
         SourceUpdateService.enable(this, PreferenceHelper.getUpdateOnlyOnWifi(this));
         SourceUpdateService.runOnce(this);
         prefs.edit().putBoolean(PREF_SYSTEM_SET_UP, true).apply();
