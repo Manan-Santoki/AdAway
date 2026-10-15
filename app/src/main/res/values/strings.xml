@@ -259,4 +259,7 @@
     <string name="permission_send_command_label">Send commands to AdAway</string>
     <string name="permission_send_command_description">Allow to send commands to AdAway like enabling or disabling the system-wide ad-blocking</string>
 
+    <!-- Settings entry when AdAway is built into the ROM -->
+    <string name="system_settings_title">Ad blocking</string>
+    <string name="system_settings_summary">Block ads and trackers in apps and browsers</string>
 </resources>

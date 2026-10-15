@@ -1,13 +1,17 @@
 package org.adaway;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 
 import org.adaway.helper.NotificationHelper;
 import org.adaway.helper.PreferenceHelper;
 import org.adaway.model.adblocking.AdBlockMethod;
 import org.adaway.model.adblocking.AdBlockModel;
 import org.adaway.model.source.SourceModel;
+import org.adaway.model.source.SourceUpdateService;
+import org.adaway.model.system.SystemHosts;
 import org.adaway.model.update.UpdateModel;
+import org.adaway.util.Constants;
 import org.adaway.util.log.ApplicationLog;
 
 /**
@@ -16,6 +20,7 @@ import org.adaway.util.log.ApplicationLog;
  * @author Bruce BUJON (bruce.bujon(at)gmail(dot)com)
  */
 public class AdAwayApplication extends Application {
+    private static final String PREF_SYSTEM_SET_UP = "systemModeSetUp";
     /**
      * The common source model for the whole application.
      */
@@ -40,6 +45,21 @@ public class AdAwayApplication extends Application {
         // Create models
         this.sourceModel = new SourceModel(this);
         this.updateModel = new UpdateModel(this);
+        // Built-in mode: first start sets everything up so blocking works out of the box
+        if (PreferenceHelper.getAdBlockMethod(this) == AdBlockMethod.SYSTEM) {
+            setUpSystemMode();
+        }
+    }
+
+    private void setUpSystemMode() {
+        SharedPreferences prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE);
+        if (prefs.getBoolean(PREF_SYSTEM_SET_UP, false)) {
+            return;
+        }
+        SystemHosts.setBuiltInComponents(this);
+        SourceUpdateService.enable(this, PreferenceHelper.getUpdateOnlyOnWifi(this));
+        SourceUpdateService.runOnce(this);
+        prefs.edit().putBoolean(PREF_SYSTEM_SET_UP, true).apply();
     }
 
     /**

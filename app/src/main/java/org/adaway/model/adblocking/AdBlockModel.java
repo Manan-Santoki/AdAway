@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import org.adaway.model.error.HostErrorException;
 import org.adaway.model.root.RootModel;
+import org.adaway.model.system.SystemModel;
 import org.adaway.model.vpn.VpnModel;
 
 import java.util.List;
@@ -62,6 +63,8 @@ public abstract class AdBlockModel {
                 return new RootModel(context);
             case VPN:
                 return new VpnModel(context);
+            case SYSTEM:
+                return new SystemModel(context);
             default:
                 return new UndefinedBlockModel(context);
         }

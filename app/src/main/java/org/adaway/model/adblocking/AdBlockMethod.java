@@ -19,7 +19,11 @@ public enum AdBlockMethod {
     /**
      * The VPN based ad block method.
      */
-    VPN(2);
+    VPN(2),
+    /**
+     * The ROM provided system hosts file ad block method, see {@link org.adaway.model.system.SystemHosts}.
+     */
+    SYSTEM(3);
 
     private int code;
 

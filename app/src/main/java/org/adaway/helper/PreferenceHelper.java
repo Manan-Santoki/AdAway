@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import org.adaway.R;
 import org.adaway.model.adblocking.AdBlockMethod;
+import org.adaway.model.system.SystemHosts;
 import org.adaway.util.Constants;
 import org.adaway.vpn.VpnStatus;
 
@@ -215,10 +216,16 @@ public final class PreferenceHelper {
                 Constants.PREFS_NAME,
                 Context.MODE_PRIVATE
         );
-        return AdBlockMethod.fromCode(prefs.getInt(
+        AdBlockMethod method = AdBlockMethod.fromCode(prefs.getInt(
                 context.getString(R.string.pref_ad_block_method_key),
                 context.getResources().getInteger(R.integer.pref_ad_block_method_key_def)
         ));
+        // A ROM with built-in support blocks out of the box, without the welcome screens
+        if (method == AdBlockMethod.UNDEFINED && SystemHosts.isAvailable()) {
+            method = AdBlockMethod.SYSTEM;
+            setAbBlockMethod(context, method);
+        }
+        return method;
     }
 
     public static void setAbBlockMethod(Context context, AdBlockMethod method) {

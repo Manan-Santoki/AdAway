@@ -49,7 +49,8 @@ public class LogViewModel extends AndroidViewModel {
     }
 
     public boolean areBlockedRequestsIgnored() {
-        return this.adBlockModel.getMethod() == AdBlockMethod.ROOT;
+        AdBlockMethod method = this.adBlockModel.getMethod();
+        return method == AdBlockMethod.ROOT || method == AdBlockMethod.SYSTEM;
     }
 
     public LiveData<List<LogEntry>> getLogs() {

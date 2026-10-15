@@ -5,7 +5,9 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.Worker;
@@ -54,6 +56,21 @@ public final class SourceUpdateService {
      */
     public static void enable(Context context, boolean unmeteredNetworkOnly) {
         enqueueWork(context, UPDATE, unmeteredNetworkOnly);
+    }
+
+    /**
+     * Fetch the hosts sources and apply them once, as soon as a network is available.
+     *
+     * @param context The application context.
+     */
+    public static void runOnce(Context context) {
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(HostsSourcesUpdateWorker.class)
+                .setConstraints(constraints)
+                .build();
+        WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME + "Once", ExistingWorkPolicy.KEEP, request);
     }
 
     /**
