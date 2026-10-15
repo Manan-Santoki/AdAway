@@ -131,25 +131,30 @@ public class SystemModel extends AdBlockModel {
     }
 
     /**
-     * Copy a hosts file to the blocklist and have the ROM make it live.
+     * Save a hosts file as the blocklist, kept across reboots, and write it to the live
+     * hosts file, which the ROM mounts over /system/etc/hosts.
      */
     private void install(File source) throws IOException {
         Log.i(SystemHosts.TAG, "installing " + source.length() + " bytes of hosts");
-        if (!SystemHosts.claimDirectory()) {
-            throw new IOException("System hosts directory is not writable");
-        }
-        // Written in place: the ROM copies it into the mounted file, never renames it
+        copy(source, SystemHosts.BLOCKLIST);
+        // In place: the mount points at this file, so it must not be replaced
+        copy(source, SystemHosts.LIVE_HOSTS);
+        Log.i(SystemHosts.TAG, "blocklist installed");
+    }
+
+    private static void copy(File source, File target) throws IOException {
         try (InputStream in = new FileInputStream(source);
-             OutputStream out = new FileOutputStream(SystemHosts.BLOCKLIST)) {
+             OutputStream out = new FileOutputStream(target)) {
             byte[] buffer = new byte[1 << 16];
             int read;
             while ((read = in.read(buffer)) > 0) {
                 out.write(buffer, 0, read);
             }
             out.flush();
+        } catch (IOException exception) {
+            Log.e(SystemHosts.TAG, "failed to write " + target, exception);
+            throw exception;
         }
-        SystemHosts.requestApply();
-        Log.i(SystemHosts.TAG, "blocklist written");
     }
 
     private void checkApplied() {

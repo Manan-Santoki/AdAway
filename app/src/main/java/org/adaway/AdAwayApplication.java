@@ -9,7 +9,9 @@ import org.adaway.model.adblocking.AdBlockMethod;
 import org.adaway.model.adblocking.AdBlockModel;
 import org.adaway.model.source.SourceModel;
 import org.adaway.model.source.SourceUpdateService;
+import org.adaway.model.system.SystemApplyWorker;
 import org.adaway.model.update.UpdateModel;
+import org.adaway.util.AppExecutors;
 import org.adaway.util.Constants;
 import org.adaway.util.log.ApplicationLog;
 
@@ -47,6 +49,8 @@ public class AdAwayApplication extends Application {
         // Built-in mode: first start sets everything up so blocking works out of the box
         if (PreferenceHelper.getAdBlockMethod(this) == AdBlockMethod.SYSTEM) {
             setUpSystemMode();
+            // On every start, not just the first: an earlier apply may have failed
+            AppExecutors.getInstance().diskIO().execute(() -> SystemApplyWorker.ensureApplied(this));
         }
     }
 
@@ -55,9 +59,8 @@ public class AdAwayApplication extends Application {
         if (prefs.getBoolean(PREF_SYSTEM_SET_UP, false)) {
             return;
         }
-        android.util.Log.i("AdAwaySystem", "first start in system mode: scheduling the first update");
+        android.util.Log.i("AdAwaySystem", "first start in system mode: scheduling daily updates");
         SourceUpdateService.enable(this, PreferenceHelper.getUpdateOnlyOnWifi(this));
-        SourceUpdateService.runOnce(this);
         prefs.edit().putBoolean(PREF_SYSTEM_SET_UP, true).apply();
     }
 
