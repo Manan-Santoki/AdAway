@@ -3,11 +3,10 @@ package org.adaway.model.system;
 import android.annotation.SuppressLint;
 import android.os.Process;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.File;
 import java.lang.reflect.Method;
-
-import timber.log.Timber;
 
 /**
  * The interface a ROM provides for the system ad block method.
@@ -29,6 +28,7 @@ public final class SystemHosts {
     private static final String PROP_AVAILABLE = "ro.adaway.system_hosts";
     private static final String PROP_OWNER = "sys.adaway.owner";
     private static final String PROP_APPLY = "sys.adaway.apply";
+    static final String TAG = "AdAwaySystem";
 
     private SystemHosts() {
     }
@@ -37,7 +37,9 @@ public final class SystemHosts {
      * @return {@code true} when running on a ROM that provides system hosts support.
      */
     public static boolean isAvailable() {
-        return "1".equals(getProperty(PROP_AVAILABLE));
+        String value = getProperty(PROP_AVAILABLE);
+        Log.i(TAG, PROP_AVAILABLE + "=" + value);
+        return "1".equals(value) || "true".equals(value);
     }
 
     /**
@@ -49,18 +51,23 @@ public final class SystemHosts {
         if (DIRECTORY.canWrite()) {
             return true;
         }
+        Log.i(TAG, "asking for " + DIRECTORY + " as uid " + Process.myUid());
         setProperty(PROP_OWNER, Integer.toString(Process.myUid()));
         for (int i = 0; i < 50 && !DIRECTORY.canWrite(); i++) {
             SystemClock.sleep(100);
         }
-        return DIRECTORY.canWrite();
+        boolean writable = DIRECTORY.canWrite();
+        Log.i(TAG, DIRECTORY + (writable ? " is writable" : " is still not writable"));
+        return writable;
     }
 
     /**
      * Ask init to copy the blocklist into the live hosts file.
      */
     public static void requestApply() {
-        setProperty(PROP_APPLY, Long.toString(System.currentTimeMillis()));
+        // An int property: seconds fit, milliseconds don't
+        setProperty(PROP_APPLY, Long.toString(System.currentTimeMillis() / 1000));
+        Log.i(TAG, "asked to apply " + BLOCKLIST.length() + " bytes");
     }
 
     @SuppressLint("PrivateApi")
@@ -68,8 +75,8 @@ public final class SystemHosts {
         try {
             Method get = Class.forName("android.os.SystemProperties").getMethod("get", String.class);
             return (String) get.invoke(null, key);
-        } catch (ReflectiveOperationException e) {
-            Timber.w(e, "Failed to read property %s", key);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            Log.e(TAG, "Failed to read property " + key, e);
             return "";
         }
     }
@@ -79,8 +86,8 @@ public final class SystemHosts {
         try {
             Method set = Class.forName("android.os.SystemProperties").getMethod("set", String.class, String.class);
             set.invoke(null, key, value);
-        } catch (ReflectiveOperationException e) {
-            Timber.e(e, "Failed to set property %s", key);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            Log.e(TAG, "Failed to set property " + key, e);
         }
     }
 }

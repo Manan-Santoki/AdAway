@@ -55,6 +55,7 @@ public class AdAwayApplication extends Application {
         if (prefs.getBoolean(PREF_SYSTEM_SET_UP, false)) {
             return;
         }
+        android.util.Log.i("AdAwaySystem", "first start in system mode: scheduling the first update");
         SourceUpdateService.enable(this, PreferenceHelper.getUpdateOnlyOnWifi(this));
         SourceUpdateService.runOnce(this);
         prefs.edit().putBoolean(PREF_SYSTEM_SET_UP, true).apply();

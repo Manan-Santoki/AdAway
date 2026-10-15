@@ -13,6 +13,7 @@ import static org.adaway.util.Constants.LOCALHOST_IPV4;
 import static org.adaway.util.Constants.LOCALHOST_IPV6;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.adaway.R;
 import org.adaway.db.AppDatabase;
@@ -42,7 +43,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import timber.log.Timber;
 
 /**
  * Ad block model for ROMs with built-in system hosts support (see {@link SystemHosts}).
@@ -134,6 +134,7 @@ public class SystemModel extends AdBlockModel {
      * Copy a hosts file to the blocklist and have the ROM make it live.
      */
     private void install(File source) throws IOException {
+        Log.i(SystemHosts.TAG, "installing " + source.length() + " bytes of hosts");
         if (!SystemHosts.claimDirectory()) {
             throw new IOException("System hosts directory is not writable");
         }
@@ -148,7 +149,7 @@ public class SystemModel extends AdBlockModel {
             out.flush();
         }
         SystemHosts.requestApply();
-        Timber.i("Installed %s bytes of hosts", source.length());
+        Log.i(SystemHosts.TAG, "blocklist written");
     }
 
     private void checkApplied() {
@@ -157,8 +158,9 @@ public class SystemModel extends AdBlockModel {
             String line = reader.readLine();
             applied = line != null && line.startsWith(HEADER1);
         } catch (IOException exception) {
-            Timber.w(exception, "Failed to read the hosts file");
+            Log.w(SystemHosts.TAG, "Failed to read the hosts file", exception);
         }
+        Log.i(SystemHosts.TAG, "hosts file applied: " + applied);
         this.applied.postValue(applied);
     }
 
